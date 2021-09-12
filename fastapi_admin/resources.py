@@ -151,6 +151,13 @@ class Model(Resource):
         return ret, qs
 
     @classmethod
+    async def validate_data(
+        cls, request: Request, ret: Dict[str, Any], m2m_ret: Dict[str, List[TortoiseModel]],
+    ) -> Optional[str]:
+        """Validates form data. Returns error message to be displayed (if any)."""
+        return None
+
+    @classmethod
     async def resolve_data(cls, request: Request, data: FormData):
         ret = {}
         m2m_ret = {}
@@ -169,7 +176,9 @@ class Model(Resource):
                 if value is None:
                     continue
                 ret[name] = value
-        return ret, m2m_ret
+
+        error_message = await cls.validate_data(request, ret, m2m_ret)
+        return ret, m2m_ret, error_message
 
     @classmethod
     async def get_filters(cls, request: Request, values: Optional[dict] = None):
